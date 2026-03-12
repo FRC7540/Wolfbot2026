@@ -1,24 +1,25 @@
 package frc.robot.subsystems;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import com.revrobotics.spark.SparkMax;
-
 
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 public class ClimberSubsystem extends SubsystemBase {
-    
-    private SparkMax climbingMotor;
-    private RelativeEncoder climberEncoder;  
 
-    private double climberPosition = climberEncoder.getPosition();
+    private final SparkMax climbingMotor;
+    private final RelativeEncoder encoder;
+    private final DigitalInput limitSwitch;
+    double extendRate = -0.5;
+    double retractRate = 0.5;
 
-    public ClimberSubsystem(int kClimbingMotorCanId) {
+    public ClimberSubsystem(int kClimbingMotorCanId, int limitSwitchPort) {
         climbingMotor = new SparkMax(kClimbingMotorCanId, MotorType.kBrushless);
-        climberEncoder.getPosition();
-        climberEncoder.setPosition(0);
+        encoder = climbingMotor.getEncoder();
+        limitSwitch = new DigitalInput(limitSwitchPort);
     }
 
     public void disable_climber() {
@@ -26,21 +27,26 @@ public class ClimberSubsystem extends SubsystemBase {
     }
 
     public void climber_extend() {
-        if (climberPosition <= 182) {
-            climbingMotor.set(-.5);
-        }
-        else {
+        if (isPeak()) {
             climbingMotor.set(0);
         }
-
+        climbingMotor.set(extendRate);
     }
 
     public void climber_retract() {
-        climbingMotor.set(.5);
-        if (climberPosition != 0) {
-            climbingMotor.set(0.5);
+        if (isHome()) {
+            climbingMotor.set(0);
+            encoder.setPosition(0);
         }
+        climbingMotor.set(retractRate);
     }
 
+    public boolean isHome() {
+        return limitSwitch.get();
+    }
+
+    public boolean isPeak() {
+        return encoder.getPosition() >= 170;
+    }
 
 }
