@@ -13,8 +13,8 @@ public class ClimberSubsystem extends SubsystemBase {
     private final SparkMax climbingMotor;
     private final RelativeEncoder encoder;
     private final DigitalInput limitSwitch;
-    double extendRate = -0.5;
-    double retractRate = 0.5;
+    double extendRate = 0.5;
+    double retractRate = -0.5;
 
     public ClimberSubsystem(int kClimbingMotorCanId, int limitSwitchPort) {
         climbingMotor = new SparkMax(kClimbingMotorCanId, MotorType.kBrushless);
@@ -30,15 +30,20 @@ public class ClimberSubsystem extends SubsystemBase {
         if (isPeak()) {
             climbingMotor.set(0);
         }
-        climbingMotor.set(extendRate);
+        else{
+            climbingMotor.set(extendRate);
+
+        }
     }
 
     public void climber_retract() {
         if (isHome()) {
-            climbingMotor.set(0);
             encoder.setPosition(0);
+            climbingMotor.set(0);
         }
-        climbingMotor.set(retractRate);
+        else {
+            climbingMotor.set(retractRate);
+        }
     }
 
     public boolean isHome() {
